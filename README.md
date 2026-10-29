@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/Swift-5.x-orange">
   <img src="https://img.shields.io/badge/%E7%AC%AC%E4%B8%89%E6%96%B9%E4%BE%9D%E8%B5%96-0-brightgreen">
   <img src="https://img.shields.io/badge/%E6%9E%84%E5%BB%BA-%E6%97%A0%E9%9C%80%20Xcode-blue">
-  <img src="https://img.shields.io/badge/license-MIT-lightgrey">
+  <img src="https://img.shields.io/badge/license-Apache--2.0-blue">
 </p>
 
 ---
@@ -158,4 +158,22 @@ swift -sdk "$(xcrun --show-sdk-path)" scripts/uitest.swift Web build/ui-shot.png
 
 ## 许可
 
-[MIT](LICENSE)
+本项目基于 [Apache License 2.0](LICENSE) 发布。
+
+```
+Copyright 2026 junyue
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+简单说：可自由使用、修改、商用与再分发，需保留版权与许可声明、对修改过的文件作出说明，并附带明确的专利授权与免责条款。

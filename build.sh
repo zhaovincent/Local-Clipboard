@@ -33,6 +33,7 @@ swiftc -O -Osize -sdk "$SDK" -target "$TARGET" \
 echo "==> 复制资源"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 cp Web/index.html Web/styles.css Web/app.js Web/logo.png "$APP/Contents/Resources/web/"
+cp LICENSE "$APP/Contents/Resources/LICENSE"
 
 echo "==> 生成图标"
 if [ -f Resources/AppLogo.png ]; then
@@ -53,6 +54,7 @@ ln -s /Applications "$DMGROOT/Applications"
 cp scripts/Install.command "$DMGROOT/Install Local Clipboard.command"
 chmod +x "$DMGROOT/Install Local Clipboard.command"
 cp scripts/安装说明.txt "$DMGROOT/安装说明.txt"
+cp LICENSE "$DMGROOT/LICENSE"
 
 hdiutil create -volname "$APP_NAME" -srcfolder "$DMGROOT" -ov -quiet -format UDZO \
   "$BUILD/$EXEC_NAME-$VERSION.dmg"
