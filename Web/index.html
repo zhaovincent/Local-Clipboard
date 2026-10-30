@@ -100,6 +100,14 @@
             <div class="group-title">通用</div>
             <div class="group-card">
               <div class="row">
+                <div class="row-main"><div class="row-label">外观</div><div class="row-desc">深浅色模式，可跟随系统自动切换</div></div>
+                <div class="pills" data-key="appearance" data-type="str">
+                  <button data-v="auto" data-theme-btn>跟随系统</button>
+                  <button data-v="light" data-theme-btn>浅色</button>
+                  <button data-v="dark" data-theme-btn>深色</button>
+                </div>
+              </div>
+              <div class="row">
                 <div class="row-main"><div class="row-label">开机自动启动</div><div class="row-desc">登录后自动在后台运行</div></div>
                 <button class="switch" data-key="launchAtLogin"><span></span></button>
               </div>
@@ -169,6 +177,26 @@
             <div class="group-card">
               <div class="row">
                 <div class="row-main">
+                  <div class="row-label">存储位置</div>
+                  <div class="row-desc" id="storageDirLabel">默认（~/Library/Application Support/Local Clipboard）</div>
+                </div>
+                <div class="btns">
+                  <button class="mini" id="btnChangeDir">更改…</button>
+                  <button class="mini" id="btnResetDir">恢复默认</button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="row-main">
+                  <div class="row-label">备份与恢复</div>
+                  <div class="row-desc">导出全部历史为 zip，或在其他电脑导入合并</div>
+                </div>
+                <div class="btns">
+                  <button class="mini" id="btnExport">导出…</button>
+                  <button class="mini" id="btnImport">导入…</button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="row-main">
                   <div class="row-label">已用空间</div>
                   <div class="row-desc" id="usageDesc">—</div>
                 </div>
@@ -185,7 +213,7 @@
           </div>
 
           <div class="about">
-            <div class="about-name">Local Clipboard <span id="verLabel">1.0.0</span></div>
+            <div class="about-name">Local Clipboard <span id="verLabel">1.1.0</span></div>
             <div class="about-desc">原生剪贴板历史 · 本地存储 · 不上传任何数据</div>
             <button class="mini quit" id="btnQuit">退出 Local Clipboard</button>
           </div>

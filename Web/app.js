@@ -53,6 +53,10 @@
     },
     settings(s) {
       state.settings = s || {};
+      // 首次拿到设置时先按 dark 标志上底色，避免等原生 theme() 期间闪白
+      if (document.documentElement.dataset.theme === undefined && s && typeof s.dark === "boolean") {
+        document.documentElement.dataset.theme = s.dark ? "dark" : "light";
+      }
       renderSettings();
       updateSubtitle();
     },
@@ -75,6 +79,12 @@
     },
     toast(t) {
       showToast(t && t.text ? t.text : String(t || ""));
+    },
+    theme(t) {
+      if (t && t.mode) state.settings.appearance = t.mode;
+      // dark 由原生侧解析（auto 时跟随系统），网页只认最终结果
+      document.documentElement.dataset.theme = t && t.dark ? "dark" : "light";
+      renderSettings();
     },
     preview(p) {
       if (!p) return;
@@ -312,6 +322,24 @@
       : "—";
     $("#verLabel").textContent = s.version || "";
 
+    const sd = $("#storageDirLabel");
+    if (sd) {
+      const dir = s.storageDir || "";
+      if (s.storageIsCustom) {
+        sd.textContent = dir;
+        sd.title = dir;
+      } else {
+        sd.textContent = "默认（~/Library/Application Support/Local Clipboard）";
+        sd.title = dir;
+      }
+    }
+    const br = $("#btnResetDir");
+    if (br) {
+      const on = !!s.storageIsCustom;
+      br.style.opacity = on ? "" : "0.4";
+      br.style.pointerEvents = on ? "" : "none";
+    }
+
     $("#btnAutoPaste").classList.toggle("on", !!s.autoPaste);
     $("#apText").textContent = s.autoPaste ? "自动粘贴" : "仅复制";
     $("#keepPinnedSw").classList.toggle("on", state.keepPinned);
@@ -462,7 +490,8 @@
         $$("button", p).forEach((b) => b.classList.remove("on"));
         btn.classList.add("on");
         const key = p.dataset.key;
-        const val = parseInt(btn.dataset.v, 10);
+        const raw = btn.dataset.v;
+        const val = p.dataset.type === "str" ? raw : parseInt(raw, 10);
         state.settings[key] = val;
         post("applySettings", { values: { [key]: val } });
       });
@@ -478,6 +507,10 @@
     });
     $("#btnReveal").addEventListener("click", () => post("revealData"));
     $("#btnQuit").addEventListener("click", () => post("quit"));
+    $("#btnChangeDir").addEventListener("click", () => post("chooseStorageDir"));
+    $("#btnResetDir").addEventListener("click", () => post("resetStorageDir"));
+    $("#btnExport").addEventListener("click", () => post("exportData"));
+    $("#btnImport").addEventListener("click", () => post("importData"));
 
     // 快捷键录制
     $("#btnRecord").addEventListener("click", () => {

@@ -17,6 +17,15 @@
 /* Local Clipboard — 界面样式 */
 
 :root {
+  --chip: rgba(255, 255, 255, 0.04);
+  --bar-bg: rgba(255, 255, 255, 0.08);
+  --bar-hover: rgba(255, 255, 255, 0.15);
+  --btn-bg: rgba(255, 255, 255, 0.1);
+  --btn-hover: rgba(255, 255, 255, 0.2);
+  --tip-bg: rgba(28, 28, 36, 0.94);
+  --tip-txt: rgba(255, 255, 255, 0.92);
+  --tip-line: rgba(255, 255, 255, 0.14);
+  --scroll: rgba(255, 255, 255, 0.22);
   --bg-top: rgba(38, 38, 46, 0.55);
   --bg-bottom: rgba(22, 22, 28, 0.72);
   --stroke: rgba(255, 255, 255, 0.09);
@@ -40,6 +49,59 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* data-theme 由原生侧按「外观设置 + 系统状态」解析后写入，永久覆盖 media 查询 */
+:root[data-theme="light"] {
+  --bg-top: rgba(255, 255, 255, 0.58);
+  --bg-bottom: rgba(240, 241, 248, 0.74);
+  --stroke: rgba(0, 0, 0, 0.08);
+  --stroke-soft: rgba(0, 0, 0, 0.05);
+  --stroke-strong: rgba(0, 0, 0, 0.18);
+  --txt: rgba(24, 24, 34, 0.94);
+  --txt2: rgba(24, 24, 34, 0.58);
+  --txt3: rgba(24, 24, 34, 0.36);
+  --card: rgba(255, 255, 255, 0.6);
+  --card-hover: rgba(255, 255, 255, 0.92);
+  --field: rgba(255, 255, 255, 0.7);
+  --field-focus: #ffffff;
+  --bar-bg: rgba(255, 255, 255, 0.55);
+  --bar-hover: rgba(255, 255, 255, 0.9);
+  --btn-bg: rgba(0, 0, 0, 0.06);
+  --btn-hover: rgba(0, 0, 0, 0.12);
+  --chip: rgba(0, 0, 0, 0.05);
+  --tip-bg: rgba(255, 255, 255, 0.97);
+  --tip-txt: rgba(24, 24, 34, 0.92);
+  --tip-line: rgba(0, 0, 0, 0.1);
+  --scroll: rgba(0, 0, 0, 0.25);
+  --shadow: 0 20px 44px -16px rgba(30, 30, 60, 0.34), 0 2px 8px rgba(30, 30, 60, 0.08);
+}
+
+/* 显式深色：手动选中深色时，即便系统是浅色也整套走深色变量
+   （选择器特异性高于 media 查询里的 :root，可完全覆盖） */
+:root[data-theme="dark"] {
+  --bg-top: rgba(38, 38, 46, 0.55);
+  --bg-bottom: rgba(22, 22, 28, 0.72);
+  --stroke: rgba(255, 255, 255, 0.09);
+  --stroke-soft: rgba(255, 255, 255, 0.06);
+  --stroke-strong: rgba(255, 255, 255, 0.18);
+  --txt: rgba(255, 255, 255, 0.95);
+  --txt2: rgba(255, 255, 255, 0.62);
+  --txt3: rgba(255, 255, 255, 0.38);
+  --card: rgba(255, 255, 255, 0.045);
+  --card-hover: rgba(255, 255, 255, 0.09);
+  --field: rgba(255, 255, 255, 0.07);
+  --field-focus: rgba(255, 255, 255, 0.11);
+  --chip: rgba(255, 255, 255, 0.04);
+  --bar-bg: rgba(255, 255, 255, 0.08);
+  --bar-hover: rgba(255, 255, 255, 0.15);
+  --btn-bg: rgba(255, 255, 255, 0.1);
+  --btn-hover: rgba(255, 255, 255, 0.2);
+  --tip-bg: rgba(28, 28, 36, 0.94);
+  --tip-txt: rgba(255, 255, 255, 0.92);
+  --tip-line: rgba(255, 255, 255, 0.14);
+  --scroll: rgba(255, 255, 255, 0.22);
+  --shadow: 0 22px 46px -16px rgba(0, 0, 0, 0.72), 0 2px 10px rgba(0, 0, 0, 0.24);
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     --bg-top: rgba(255, 255, 255, 0.58);
@@ -54,6 +116,15 @@
     --card-hover: rgba(255, 255, 255, 0.92);
     --field: rgba(255, 255, 255, 0.7);
     --field-focus: #ffffff;
+    --bar-bg: rgba(255, 255, 255, 0.55);
+    --bar-hover: rgba(255, 255, 255, 0.9);
+    --btn-bg: rgba(0, 0, 0, 0.06);
+    --btn-hover: rgba(0, 0, 0, 0.12);
+    --chip: rgba(0, 0, 0, 0.05);
+    --tip-bg: rgba(255, 255, 255, 0.97);
+    --tip-txt: rgba(24, 24, 34, 0.92);
+    --tip-line: rgba(0, 0, 0, 0.1);
+    --scroll: rgba(0, 0, 0, 0.25);
     --shadow: 0 20px 44px -16px rgba(30, 30, 60, 0.34), 0 2px 8px rgba(30, 30, 60, 0.08);
   }
 }
@@ -212,7 +283,7 @@ body.open .panel {
   padding: 2px 5px;
   border-radius: 5px;
   border: 0.5px solid var(--stroke);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--chip);
 }
 
 /* ---------- 分类标签 ---------- */
@@ -224,7 +295,7 @@ body.open .panel {
   margin: 0 16px 8px;
   padding: 3px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.045);
+  background: var(--chip);
   border: 0.5px solid var(--stroke-soft);
 }
 .tab {
@@ -406,7 +477,7 @@ body.open .panel {
   transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 .acts button svg { width: 13px; height: 13px; }
-.acts button:hover { background: rgba(255, 255, 255, 0.14); color: var(--txt); transform: translateY(-1px); }
+.acts button:hover { background: var(--bar-hover); color: var(--txt); transform: translateY(-1px); }
 .acts button.on { color: var(--accent); }
 .acts button[data-act="del"]:hover { background: rgba(255, 92, 120, 0.22); color: #ff8296; }
 
@@ -470,7 +541,7 @@ body.open .panel {
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--bar-bg);
   border: 0.5px solid var(--stroke);
   color: var(--txt2);
 }
@@ -494,7 +565,7 @@ body.open .panel {
   font-size: 9.5px;
   padding: 1px 4px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--bar-bg);
   border: 0.5px solid var(--stroke);
   color: var(--txt2);
 }
@@ -621,11 +692,11 @@ body.open .panel {
   font-weight: 560;
   letter-spacing: 1px;
   color: var(--txt);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--bar-bg);
   border: 0.5px solid var(--stroke);
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
-.recorder:hover { background: rgba(255, 255, 255, 0.14); }
+.recorder:hover { background: var(--bar-hover); }
 .recorder.recording {
   color: var(--accent-3);
   border-color: rgba(255, 122, 182, 0.6);
@@ -642,7 +713,7 @@ body.open .panel {
   gap: 4px;
   padding: 2px;
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--chip);
   border: 0.5px solid var(--stroke-soft);
 }
 .pills button {
@@ -653,7 +724,7 @@ body.open .panel {
   color: var(--txt2);
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s var(--ease);
 }
-.pills button:hover { color: var(--txt); background: rgba(255, 255, 255, 0.07); }
+.pills button:hover { color: var(--txt); background: var(--bar-bg); }
 .pills button.on {
   color: #fff;
   background: linear-gradient(135deg, rgba(139, 124, 255, 0.95), rgba(90, 139, 255, 0.95));
@@ -667,11 +738,11 @@ body.open .panel {
   border-radius: 7px;
   font-size: 10.6px;
   color: var(--txt2);
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--bar-bg);
   border: 0.5px solid var(--stroke);
   transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
-.mini:hover { background: rgba(255, 255, 255, 0.14); color: var(--txt); transform: translateY(-1px); }
+.mini:hover { background: var(--bar-hover); color: var(--txt); transform: translateY(-1px); }
 .mini.danger { color: #ff8a9c; }
 .mini.danger:hover { background: rgba(255, 92, 120, 0.2); color: #ffb3be; }
 
@@ -739,9 +810,9 @@ body.open .panel {
   padding: 7px 14px;
   border-radius: 99px;
   font-size: 11.5px;
-  color: #fff;
-  background: rgba(28, 28, 36, 0.9);
-  border: 0.5px solid rgba(255, 255, 255, 0.14);
+  color: var(--tip-txt);
+  background: var(--tip-bg);
+  border: 0.5px solid var(--tip-line);
   box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.8);
   opacity: 0;
   pointer-events: none;
@@ -757,9 +828,9 @@ body.open .panel {
   padding: 3px 7px;
   border-radius: 6px;
   font-size: 10px;
-  color: #fff;
-  background: rgba(20, 20, 26, 0.92);
-  border: 0.5px solid rgba(255, 255, 255, 0.12);
+  color: var(--tip-txt);
+  background: var(--tip-bg);
+  border: 0.5px solid var(--tip-line);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.14s ease;

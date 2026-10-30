@@ -41,6 +41,43 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
 
     private let panelSize = NSSize(width: 452, height: 704)
     private let inset: CGFloat = 22
+    private var currentTheme = false
+
+    /// 外观同步：跟系统改 NSAppearance / 材质，并推送主题给网页
+    var themeSync: String { currentTheme ? "dark" : "light" }
+
+    private func syncAppearance() {
+        // 视图就绪前不同步（blurView 在 configureContent 中创建）
+        guard blurView != nil else { return }
+        let mode = settings.appearance
+        let dark: Bool
+        switch mode {
+        case "dark": dark = true
+        case "light": dark = false
+        default:
+            let best = NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua])
+            dark = (best == .darkAqua)
+        }
+        currentTheme = dark
+        window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+        blurView.material = dark ? .hudWindow : .sidebar
+        call("theme", jsonString(["mode": settings.appearance, "dark": dark]))
+    }
+
+    private var appearanceObserver: NSObjectProtocol?
+
+    private func installAppearanceObserver() {
+        guard appearanceObserver == nil else { return }
+        appearanceObserver = DistributedNotificationCenter.default.addObserver(
+            forName: NSNotification.Name("AppleInterfaceThemeChangedNotification"),
+            object: nil, queue: .main) { [weak self] _ in
+                guard let self, self.settings.appearance == "auto" else { return }
+                // 系统切换瞬间 NSApp.effectiveAppearance 可能滞后，稍等一拍再同步
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                    self?.syncAppearance()
+                }
+            }
+    }
 
     init(store: HistoryStore, settings: SettingsStore) {
         self.store = store
@@ -50,8 +87,8 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
                                   backing: .buffered,
                                   defer: false)
         super.init()
-        configureWindow()
         configureContent()
+        configureWindow()
     }
 
     // MARK: - 构建
@@ -66,6 +103,8 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
         window.isMovableByWindowBackground = false
         window.delegate = self
         window.title = "Local Clipboard"
+        installAppearanceObserver()
+        syncAppearance()
     }
 
     private func configureContent() {
@@ -120,6 +159,7 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
         NSApp.activate(ignoringOtherApps: true)
         window.makeFirstResponder(webView)
 
+        syncAppearance()
         pushItems()
         pushSettings()
         call("open")
@@ -256,6 +296,9 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
         case "applySettings":
             if let payload = body["values"] as? [String: Any] {
                 settings.apply(payload)
+                if payload["appearance"] != nil {
+                    syncAppearance()
+                }
                 store.prune()
                 store.save()
                 pushItems()
@@ -277,6 +320,18 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
 
         case "revealData":
             NSWorkspace.shared.activateFileViewerSelecting([store.rootDir])
+
+        case "chooseStorageDir":
+            chooseStorageDir()
+
+        case "resetStorageDir":
+            resetStorageDir()
+
+        case "exportData":
+            exportBackup()
+
+        case "importData":
+            importBackup()
 
         case "openAX":
             PasteService.openAccessibilitySettings()
@@ -375,5 +430,97 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
         // 刚显示时系统激活切换可能瞬间夺走 key，忽略这段竞态窗口
         guard Date().timeIntervalSince(lastShownAt) > 0.35 else { return }
         hide(restoreFocus: false)
+    }
+
+    // MARK: - 存储位置 / 备份
+
+    /// 弹出系统对话框期间抑制面板失焦自动隐藏（与快捷键录制同一机制）
+    private func modalProtect() {
+        suppressHide = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            self?.suppressHide = false
+        }
+    }
+
+    /// 选择新的存储目录 -> 确认迁移 -> 刷新界面
+    private func chooseStorageDir() {
+        modalProtect()
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.directoryURL = settings.storageRoot
+        panel.message = "选择剪贴板历史的存储位置（会自动迁移现有数据）"
+        panel.prompt = "选择"
+        let resp = panel.runModal()
+        guard resp == .OK, let url = panel.url else { return }
+        if url.standardizedFileURL.path == HistoryStore.defaultRoot().standardizedFileURL.path {
+            resetStorageDir(silent: true)
+            return
+        }
+        let target = url.appendingPathComponent("Local Clipboard", isDirectory: true)
+        if let err = store.migrateData(to: target) {
+            toast(err)
+            return
+        }
+        settings.storageDir = target.path
+        pushSettings()
+        pushItems()
+        toast("已迁移到新位置")
+    }
+
+    /// 恢复默认存储位置（如有自定义则迁移回默认目录）
+    private func resetStorageDir(silent: Bool = false) {
+        let def = HistoryStore.defaultRoot()
+        if settings.storageDir.isEmpty {
+            if !silent { toast("当前已在使用默认位置") }
+            return
+        }
+        if let err = store.migrateData(to: def) {
+            toast(err)
+            return
+        }
+        settings.storageDir = ""
+        pushSettings()
+        pushItems()
+        toast("已恢复默认存储位置")
+    }
+
+    private func exportBackup() {
+        modalProtect()
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.zip]
+        panel.nameFieldStringValue = "Local Clipboard Backup \(HistoryStore.transferStamp()).zip"
+        panel.title = "导出剪贴板备份"
+        let resp = panel.runModal()
+        guard resp == .OK, let url = panel.url else { return }
+        if let err = store.exportData(to: url) {
+            toast(err)
+        } else {
+            toast("备份已导出")
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        }
+    }
+
+    private func importBackup() {
+        modalProtect()
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [.zip]
+        panel.message = "选择之前导出的备份 zip（与当前历史合并，重复内容自动跳过）"
+        panel.prompt = "导入"
+        let resp = panel.runModal()
+        guard resp == .OK, let url = panel.url else { return }
+        let (n, msg) = store.importData(from: url)
+        pushItems()
+        pushSettings()
+        if let msg {
+            toast(msg)
+        } else {
+            toast("已导入 \(n) 条记录")
+        }
     }
 }

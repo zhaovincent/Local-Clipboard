@@ -25,6 +25,8 @@ final class SettingsStore {
             "maxItems": 300,
             "maxDays": 0,
             "maxImageMB": 200,
+            "storageDir": "",
+            "appearance": "auto",
             "autoPaste": true,
             "pastePlainText": false,
             "playSound": false,
@@ -46,6 +48,29 @@ final class SettingsStore {
     var maxImageMB: Int {
         get { d.integer(forKey: "maxImageMB") }
         set { d.set(max(10, newValue), forKey: "maxImageMB") }
+    }
+
+    /// 自定义存储目录（空串 = 默认位置）
+    var storageDir: String {
+        get { d.string(forKey: "storageDir") ?? "" }
+        set { d.set(newValue, forKey: "storageDir") }
+    }
+
+    /// 外观：auto 跟随系统 / light 浅色 / dark 深色
+    var appearance: String {
+        get { d.string(forKey: "appearance") ?? "auto" }
+        set { d.set(newValue, forKey: "appearance") }
+    }
+
+    /// 当前生效的存储根目录
+    var storageRoot: URL {
+        let raw = storageDir.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !raw.isEmpty else { return HistoryStore.defaultRoot() }
+        var path = raw
+        if path.hasPrefix("~") {
+            path = NSString(string: path).expandingTildeInPath
+        }
+        return URL(fileURLWithPath: path, isDirectory: true)
     }
 
     var autoPaste: Bool {
@@ -83,7 +108,13 @@ final class SettingsStore {
     }
 
     func payload() -> [String: Any] {
-        [
+        var dir = storageDir.trimmingCharacters(in: .whitespacesAndNewlines)
+        if dir.isEmpty {
+            dir = HistoryStore.defaultRoot().path
+        } else if dir.hasPrefix("~") {
+            dir = NSString(string: dir).expandingTildeInPath
+        }
+        return [
             "maxItems": maxItems,
             "maxDays": maxDays,
             "maxImageMB": maxImageMB,
@@ -94,7 +125,10 @@ final class SettingsStore {
             "hotkey": hotKeyDisplay,
             "trusted": PasteService.isTrusted,
             "hotkeyOk": HotKeyManager.shared.isRegistered,
-            "version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+            "storageDir": dir,
+            "storageIsCustom": !storageDir.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+            "appearance": appearance,
+            "version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.1.0"
         ]
     }
 
@@ -107,6 +141,7 @@ final class SettingsStore {
         if let v = payload["pastePlainText"] as? Bool { pastePlainText = v }
         if let v = payload["playSound"] as? Bool { playSound = v }
         if let v = payload["launchAtLogin"] as? Bool { LaunchAtLogin.set(v) }
+        if let v = payload["appearance"] as? String { appearance = v }
     }
 }
 

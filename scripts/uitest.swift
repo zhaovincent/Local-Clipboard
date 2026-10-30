@@ -75,11 +75,14 @@ webView.loadFileURL(indexURL, allowingReadAccessTo: webDir)
 
 let thumb = thumbURL()
 let now = Date().timeIntervalSince1970
+// LC_UI_DARK=1 时注入深色主题，验证暗色变量整套生效
+let dark = ProcessInfo.processInfo.environment["LC_UI_DARK"] == "1"
+let darkAppearance = dark ? "dark" : "auto"
 let items: [[String: Any]] = [
     ["id": "1", "kind": "text", "text": "Local Clipboard 会把复制的文字、图片、文件都收进来，支持搜索和置顶。", "createdAt": now - 40, "pinned": true, "len": 62, "size": 180, "source": "Safari 浏览器"],
     ["id": "2", "kind": "link", "text": "https://www.apple.com.cn/macbook-pro/", "createdAt": now - 320, "pinned": false, "len": 37, "size": 37, "source": "Google Chrome"],
     ["id": "3", "kind": "image", "text": "图片 240 × 150", "createdAt": now - 900, "pinned": false, "len": 10, "size": 24000, "w": 240, "h": 150, "thumb": thumb, "source": "Screenshots"],
-    ["id": "4", "kind": "file", "text": "/Users/zhj/Desktop/设计稿终版.png\n/Users/zhj/Desktop/需求说明.pdf", "createdAt": now - 3400, "pinned": false, "len": 60, "size": 1024, "source": "Finder"],
+    ["id": "4", "kind": "file", "text": "/Users/me/Desktop/设计稿终版.png\n/Users/me/Desktop/需求说明.pdf", "createdAt": now - 3400, "pinned": false, "len": 60, "size": 1024, "source": "Finder"],
     ["id": "5", "kind": "text", "text": "npm run build && open build/Local Clipboard.app", "createdAt": now - 7300, "pinned": false, "len": 41, "size": 41, "source": "终端"],
     ["id": "6", "kind": "text", "text": "会议纪要：下周一 10:00 评审新版本的交互方案，记得提前同步设计稿。", "createdAt": now - 90000, "pinned": false, "len": 34, "size": 100, "source": "飞书"]
 ]
@@ -88,7 +91,7 @@ DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
     let inject = """
     window.__native.items(\(jsonString(items)));
     window.__native.stats(\(jsonString(["count": 6, "images": 1, "pinned": 1, "bytes": 28451, "bytesText": "27.8 KB"])));
-    window.__native.settings(\(jsonString(["hotkey": "⌘⇧V", "autoPaste": true, "maxItems": 300, "maxImageMB": 200, "maxDays": 0, "version": "1.0.0", "trusted": true, "launchAtLogin": false])));
+    window.__native.settings(\(jsonString(["hotkey": "⌘⇧V", "autoPaste": true, "maxItems": 300, "maxImageMB": 200, "maxDays": 0, "version": "1.1.0", "trusted": true, "launchAtLogin": false, "appearance": darkAppearance, "dark": dark, "storageDir": "/Users/me/Library/Application Support/Local Clipboard", "storageIsCustom": false])));
     window.__native.open();
     """
     webView.evaluateJavaScript(inject) { _, err in
@@ -122,7 +125,14 @@ DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
                 meta: q('.card .meta') ? q('.card .meta').textContent : '',
                 listScrollH: q('#list').scrollHeight,
                 listClientH: q('#list').clientHeight,
-                bodyOpen: document.body.classList.contains('open')
+                bodyOpen: document.body.classList.contains('open'),
+                theme: document.documentElement.dataset.theme || '(unset)',
+                themeBG: getComputedStyle(q('#panel')).getPropertyValue('--bg-bottom').trim(),
+                themeTXT: getComputedStyle(document.documentElement).getPropertyValue('--txt').trim(),
+                themeBtnOn: (document.querySelector('.pills[data-key="appearance"] button.on')||{}).textContent || '',
+                storageLabel: (q('#storageDirLabel')||{}).textContent || '',
+                themeBtns: document.querySelectorAll('[data-theme-btn]').length,
+                backupBtns: [q('#btnExport'), q('#btnImport')].filter(Boolean).length
               });
             })()
             """

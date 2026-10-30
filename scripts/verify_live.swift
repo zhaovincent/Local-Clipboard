@@ -77,8 +77,11 @@ final class Bridge: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
             call("items", json(payload))
             call("stats", json(["count": payload.count, "images": 0, "pinned": 0,
                                 "bytes": 0, "bytesText": "0 KB"]))
-            call("settings", json(["hotkey": "⌘⇧V", "autoPaste": true, "version": "1.0.0",
-                                   "hotkeyOk": true, "trusted": true]))
+            call("settings", json(["hotkey": "⌘⇧V", "autoPaste": true, "version": "1.1.0",
+                                   "hotkeyOk": true, "trusted": true,
+                                   "appearance": "auto", "dark": false,
+                                   "storageDir": "/Users/me/Library/Application Support/Local Clipboard",
+                                   "storageIsCustom": false]))
             let q = pending; pending = []
             for (f, j) in q { call(f, j) }
             if first { onReady?() }
@@ -123,7 +126,11 @@ bridge.onReady = {
           subtitle: document.querySelector('#subtitle').textContent,
           firstText: (document.querySelector('#list .card .txt')||{}).textContent || '',
           sections: Array.from(document.querySelectorAll('.sechead')).map(function(e){return e.textContent}),
-          bodyOpen: document.body.classList.contains('open')
+          bodyOpen: document.body.classList.contains('open'),
+          theme: document.documentElement.dataset.theme || '(unset)',
+          storageLabel: (document.getElementById('storageDirLabel')||{}).textContent || '',
+          themeBtns: document.querySelectorAll('[data-theme-btn]').length,
+          backupBtns: [document.getElementById('btnExport'), document.getElementById('btnImport')].filter(Boolean).length
         })
         """
         webView.evaluateJavaScript(probe) { r, e in

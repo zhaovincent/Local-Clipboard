@@ -24,7 +24,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var monitor: ClipboardMonitor!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // 离线自检：LC_SELFTEST=1 时跑迁移/导出/导入全链路后退出，不触碰真实数据
+        if ProcessInfo.processInfo.environment["LC_SELFTEST"] == "1" {
+            SelfTest.run()
+            return
+        }
         buildMainMenu()
+
+        // 上次运行使用过自定义目录：本次启动直接从该目录读取
+        if !settings.storageDir.isEmpty {
+            store.rebindRoot(settings.storageRoot)
+        }
         store.load()
 
         panel = PanelController(store: store, settings: settings)
