@@ -122,7 +122,7 @@ final class ClipboardMonitor {
             }
             if let cg, let saved = store.storeImage(cg) {
                 let item = ClipItem(kind: .image,
-                                    text: "图片 \(saved.1) × \(saved.2)",
+                                    text: L10n.imageItem(saved.1, saved.2),
                                     imageBase: saved.0,
                                     width: saved.1,
                                     height: saved.2,

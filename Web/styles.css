@@ -243,6 +243,23 @@ body.open .panel {
 .ghost svg { width: 15px; height: 15px; }
 .ghost:hover { background: var(--card-hover); color: var(--txt); transform: translateY(-1px); }
 .ghost:active { transform: scale(0.92); }
+.ghost.danger:hover { background: rgba(255, 92, 120, 0.18); color: #ff8a9c; }
+/* 一键清除的待确认态：高亮呼吸，提示「再点一次」 */
+.ghost.arming,
+.ghost.arming:hover {
+  background: rgba(255, 92, 120, 0.24);
+  color: #ffd0d8;
+  animation: armPulse 0.9s ease-in-out infinite;
+}
+@keyframes armPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 92, 120, 0.45); }
+  50% { box-shadow: 0 0 0 4px rgba(255, 92, 120, 0); }
+}
+.mini.arming {
+  background: rgba(255, 92, 120, 0.24);
+  color: #ffd0d8;
+  animation: armPulse 0.9s ease-in-out infinite;
+}
 
 /* ---------- 搜索 ---------- */
 .search {

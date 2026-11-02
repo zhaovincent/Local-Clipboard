@@ -285,7 +285,7 @@ extension HistoryStore {
                 }
             }
         } catch {
-            return "迁移失败：\(error.localizedDescription)"
+            return L10n.migrationFailed(error.localizedDescription)
         }
         rebindRoot(newRoot)
         save()

@@ -22,6 +22,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var panel: PanelController!
     private var statusItem: NSStatusItem!
     private var monitor: ClipboardMonitor!
+    private var l10nObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // 离线自检：LC_SELFTEST=1 时跑迁移/导出/导入全链路后退出，不触碰真实数据
@@ -29,7 +30,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             SelfTest.run()
             return
         }
+        // 语言初始化：读取偏好（auto 时跟随系统首选语言）
+        L10n.refresh(settings.language)
         buildMainMenu()
+        // 语言切换后重建菜单、状态栏提示，并让面板刷新动态文案
+        l10nObserver = NotificationCenter.default.addObserver(forName: L10n.didChange, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            self.buildMainMenu()
+            if let button = self.statusItem?.button {
+                button.toolTip = "Local Clipboard · \(self.settings.hotKeyDisplay)"
+            }
+            self.panel?.pushSettings()
+        }
 
         // 上次运行使用过自定义目录：本次启动直接从该目录读取
         if !settings.storageDir.isEmpty {
@@ -76,10 +88,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             settings.hotKeyMods = mods
             return
         }
-        NSLog("Local Clipboard: 所有候选快捷键均注册失败，请在设置中手动指定")
+        NSLog("Local Clipboard: all candidate hotkeys failed to register; set one manually in Settings")
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        if let l10nObserver {
+            NotificationCenter.default.removeObserver(l10nObserver)
+        }
         store.save()
     }
 
@@ -92,22 +107,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         mainMenu.addItem(appMenuItem)
         let appMenu = NSMenu()
         appMenuItem.submenu = appMenu
-        appMenu.addItem(withTitle: "关于 Local Clipboard", action: #selector(showAbout), keyEquivalent: "")
+        appMenu.addItem(withTitle: L10n.about, action: #selector(showAbout), keyEquivalent: "")
         appMenu.addItem(.separator())
-        appMenu.addItem(withTitle: "隐藏面板", action: #selector(hidePanel), keyEquivalent: "w")
-        appMenu.addItem(withTitle: "退出 Local Clipboard", action: #selector(quitApp), keyEquivalent: "q")
+        appMenu.addItem(withTitle: L10n.hidePanel, action: #selector(hidePanel), keyEquivalent: "w")
+        appMenu.addItem(withTitle: L10n.quitApp, action: #selector(quitApp), keyEquivalent: "q")
 
         let editMenuItem = NSMenuItem()
         mainMenu.addItem(editMenuItem)
-        let editMenu = NSMenu(title: "编辑")
+        let editMenu = NSMenu(title: L10n.editMenu)
         editMenuItem.submenu = editMenu
-        editMenu.addItem(withTitle: "撤销", action: Selector(("undo:")), keyEquivalent: "z")
-        editMenu.addItem(withTitle: "重做", action: Selector(("redo:")), keyEquivalent: "Z")
+        editMenu.addItem(withTitle: L10n.undo, action: Selector(("undo:")), keyEquivalent: "z")
+        editMenu.addItem(withTitle: L10n.redo, action: Selector(("redo:")), keyEquivalent: "Z")
         editMenu.addItem(.separator())
-        editMenu.addItem(withTitle: "剪切", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
-        editMenu.addItem(withTitle: "复制", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
-        editMenu.addItem(withTitle: "粘贴", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
-        editMenu.addItem(withTitle: "全选", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        editMenu.addItem(withTitle: L10n.cut, action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        editMenu.addItem(withTitle: L10n.copy, action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        editMenu.addItem(withTitle: L10n.paste, action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        editMenu.addItem(withTitle: L10n.selectAll, action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
 
         NSApp.mainMenu = mainMenu
     }
@@ -150,12 +165,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func showStatusMenu() {
         let menu = NSMenu()
-        menu.addItem(withTitle: "打开剪贴板面板", action: #selector(openPanelFromMenu), keyEquivalent: "").target = self
+        menu.addItem(withTitle: L10n.openPanel, action: #selector(openPanelFromMenu), keyEquivalent: "").target = self
         menu.addItem(.separator())
-        menu.addItem(withTitle: "清空历史（保留置顶）", action: #selector(clearFromMenu), keyEquivalent: "").target = self
-        menu.addItem(withTitle: "打开设置", action: #selector(openSettingsFromMenu), keyEquivalent: "").target = self
+        menu.addItem(withTitle: L10n.clearKeepPinned, action: #selector(clearFromMenu), keyEquivalent: "").target = self
+        menu.addItem(withTitle: L10n.openSettings, action: #selector(openSettingsFromMenu), keyEquivalent: "").target = self
         menu.addItem(.separator())
-        menu.addItem(withTitle: "退出 Local Clipboard", action: #selector(quitApp), keyEquivalent: "").target = self
+        menu.addItem(withTitle: L10n.quitApp, action: #selector(quitApp), keyEquivalent: "").target = self
 
         statusItem.menu = menu
         statusItem.button?.performClick(nil)
@@ -174,7 +189,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func clearFromMenu() {
         store.clear(keepPinned: true)
         panel.pushItems()
-        panel.toast("已清空历史，保留置顶项")
+        panel.toast(L10n.clearKeepToast)
     }
 
     // MARK: - 面板

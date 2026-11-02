@@ -27,6 +27,7 @@ final class SettingsStore {
             "maxImageMB": 200,
             "storageDir": "",
             "appearance": "auto",
+            "language": "auto",
             "autoPaste": true,
             "pastePlainText": false,
             "playSound": false,
@@ -60,6 +61,12 @@ final class SettingsStore {
     var appearance: String {
         get { d.string(forKey: "appearance") ?? "auto" }
         set { d.set(newValue, forKey: "appearance") }
+    }
+
+    /// 界面语言：auto 跟随系统 / zh / en
+    var language: String {
+        get { d.string(forKey: "language") ?? "auto" }
+        set { d.set(newValue, forKey: "language") }
     }
 
     /// 当前生效的存储根目录
@@ -128,7 +135,9 @@ final class SettingsStore {
             "storageDir": dir,
             "storageIsCustom": !storageDir.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
             "appearance": appearance,
-            "version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.1.0"
+            "language": language,
+            "lang": L10n.lang,
+            "version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.2.0"
         ]
     }
 
@@ -142,6 +151,7 @@ final class SettingsStore {
         if let v = payload["playSound"] as? Bool { playSound = v }
         if let v = payload["launchAtLogin"] as? Bool { LaunchAtLogin.set(v) }
         if let v = payload["appearance"] as? String { appearance = v }
+        if let v = payload["language"] as? String { language = v }
     }
 }
 

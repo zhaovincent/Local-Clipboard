@@ -19,17 +19,24 @@
           </div>
           <div class="btext">
             <div class="title">Local Clipboard</div>
-            <div class="sub" id="subtitle">剪贴板历史</div>
+            <div class="sub" id="subtitle" data-i18n="brandSub">剪贴板历史</div>
           </div>
         </div>
         <div class="hdr-btns">
-          <button class="ghost" id="btnSettings" data-tip="设置 ⌘,">
+          <button class="ghost danger" id="btnClearHead" data-tip="清空历史（保留置顶）" data-i18n-tip="tipClearHead">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.5 7h15"></path>
+              <path d="M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7"></path>
+              <path d="M6.5 7l.8 12A2 2 0 0 0 9.3 21h5.4a2 2 0 0 0 2-1.9L17.5 7"></path>
+            </svg>
+          </button>
+          <button class="ghost" id="btnSettings" data-tip="设置 ⌘," data-i18n-tip="tipSettings">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="3.1"></circle>
               <path d="M19.4 14.5a1.6 1.6 0 0 0 .32 1.77l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.6 1.6 0 0 0-1.77-.32 1.6 1.6 0 0 0-1 1.46V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1.05-1.46 1.6 1.6 0 0 0-1.77.32l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.6 1.6 0 0 0 .32-1.77 1.6 1.6 0 0 0-1.46-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.46-1.05 1.6 1.6 0 0 0-.32-1.77l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.6 1.6 0 0 0 1.77.32H9a1.6 1.6 0 0 0 1-1.46V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.46 1.6 1.6 0 0 0 1.77-.32l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.6 1.6 0 0 0-.32 1.77V9a1.6 1.6 0 0 0 1.46 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1.5z"></path>
             </svg>
           </button>
-          <button class="ghost" id="btnClose" data-tip="关闭 esc">
+          <button class="ghost" id="btnClose" data-tip="关闭 esc" data-i18n-tip="tipClose">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
               <path d="M6 6l12 12M18 6L6 18"></path>
             </svg>
@@ -42,17 +49,17 @@
           <circle cx="11" cy="11" r="6.4"></circle>
           <path d="M16 16l4 4"></path>
         </svg>
-        <input id="q" type="text" placeholder="搜索剪贴板历史…" autocomplete="off" spellcheck="false" />
+        <input id="q" type="text" placeholder="搜索剪贴板历史…" autocomplete="off" spellcheck="false" data-i18n-ph="searchPh" />
         <span class="kbd-hint" id="searchHint">⌘F</span>
       </div>
 
       <nav class="tabs" id="tabs">
         <div class="tabind" id="tabind"></div>
-        <button class="tab on" data-f="all">全部</button>
-        <button class="tab" data-f="text">文本</button>
-        <button class="tab" data-f="image">图片</button>
-        <button class="tab" data-f="file">文件</button>
-        <button class="tab" data-f="pin">置顶</button>
+        <button class="tab on" data-f="all" data-i18n="tabAll">全部</button>
+        <button class="tab" data-f="text" data-i18n="tabText">文本</button>
+        <button class="tab" data-f="image" data-i18n="tabImage">图片</button>
+        <button class="tab" data-f="file" data-i18n="tabFile">文件</button>
+        <button class="tab" data-f="pin" data-i18n="tabPin">置顶</button>
       </nav>
 
       <main class="listwrap" id="listwrap">
@@ -66,84 +73,92 @@
               <path d="M46 30.5l2.6 5.4 5.4 2.6-5.4 2.6L46 46.5l-2.6-5.4L38 38.5l5.4-2.6z" stroke-width="1.8"></path>
             </svg>
           </div>
-          <div class="empty-title" id="emptyTitle">还没有剪贴板记录</div>
-          <div class="empty-desc" id="emptyDesc">复制任意文字、图片或文件，这里会自动收集</div>
-          <div class="empty-key"><kbd id="emptyKey">⌘⇧V</kbd> 随时唤出面板</div>
+          <div class="empty-title" id="emptyTitle" data-i18n="emptyTitle">还没有剪贴板记录</div>
+          <div class="empty-desc" id="emptyDesc" data-i18n="emptyDesc">复制任意文字、图片或文件，这里会自动收集</div>
+          <div class="empty-key"><kbd id="emptyKey">⌘⇧V</kbd> <span data-i18n="emptyKeySuffix">随时唤出面板</span></div>
         </div>
       </main>
 
       <footer class="ftr">
         <div class="hints" id="hints">
-          <span><kbd>↑</kbd><kbd>↓</kbd> 选择</span>
-          <span><kbd>↵</kbd> 复制</span>
-          <span><kbd>⌘</kbd><kbd>⌫</kbd> 删除</span>
+          <span><kbd>↑</kbd><kbd>↓</kbd><span data-i18n="hintSelect"> 选择</span></span>
+          <span><kbd>↵</kbd><span data-i18n="hintCopy"> 复制</span></span>
+          <span><kbd>⌘</kbd><kbd>⌫</kbd><span data-i18n="hintDelete"> 删除</span></span>
         </div>
-        <button class="autopaste" id="btnAutoPaste" data-tip="复制后自动粘贴到当前应用">
+        <button class="autopaste" id="btnAutoPaste" data-tip="复制后自动粘贴到当前应用" data-i18n-tip="tipAutopaste">
           <span class="dot" id="apDot"></span>
-          <span id="apText">自动粘贴</span>
+          <span id="apText" data-i18n="autoPaste">自动粘贴</span>
         </button>
       </footer>
 
       <!-- 设置面板 -->
       <section class="sheet" id="settings">
         <div class="sheet-hdr">
-          <button class="ghost back" id="btnBack" data-tip="返回">
+          <button class="ghost back" id="btnBack" data-tip="返回" data-i18n-tip="tipBack">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M15 5l-7 7 7 7"></path>
             </svg>
           </button>
-          <div class="sheet-title">设置</div>
+          <div class="sheet-title" data-i18n="settingsTitle">设置</div>
           <div class="sheet-spacer"></div>
         </div>
         <div class="sheet-body" id="sheetBody">
           <div class="group">
-            <div class="group-title">通用</div>
+            <div class="group-title" data-i18n="grpGeneral">通用</div>
             <div class="group-card">
               <div class="row">
-                <div class="row-main"><div class="row-label">外观</div><div class="row-desc">深浅色模式，可跟随系统自动切换</div></div>
-                <div class="pills" data-key="appearance" data-type="str">
-                  <button data-v="auto" data-theme-btn>跟随系统</button>
-                  <button data-v="light" data-theme-btn>浅色</button>
-                  <button data-v="dark" data-theme-btn>深色</button>
+                <div class="row-main"><div class="row-label" data-i18n="language">语言 / Language</div><div class="row-desc" data-i18n="languageDesc">界面显示语言，跟随系统可自动选择</div></div>
+                <div class="pills" data-key="language" data-type="str">
+                  <button data-v="auto" data-i18n="followSystem">跟随系统</button>
+                  <button data-v="zh" data-i18n="chinese">中文</button>
+                  <button data-v="en" data-i18n="english">English</button>
                 </div>
               </div>
               <div class="row">
-                <div class="row-main"><div class="row-label">开机自动启动</div><div class="row-desc">登录后自动在后台运行</div></div>
+                <div class="row-main"><div class="row-label" data-i18n="appearance">外观</div><div class="row-desc" data-i18n="appearanceDesc">深浅色模式，可跟随系统自动切换</div></div>
+                <div class="pills" data-key="appearance" data-type="str">
+                  <button data-v="auto" data-theme-btn data-i18n="followSystem">跟随系统</button>
+                  <button data-v="light" data-theme-btn data-i18n="light">浅色</button>
+                  <button data-v="dark" data-theme-btn data-i18n="dark">深色</button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="row-main"><div class="row-label" data-i18n="launchLogin">开机自动启动</div><div class="row-desc" data-i18n="launchLoginDesc">登录后自动在后台运行</div></div>
                 <button class="switch" data-key="launchAtLogin"><span></span></button>
               </div>
               <div class="row">
-                <div class="row-main"><div class="row-label">复制后自动粘贴</div><div class="row-desc" id="axDesc">选中记录后直接粘贴到当前应用（需辅助功能授权）</div></div>
+                <div class="row-main"><div class="row-label" data-i18n="autoPasteRow">复制后自动粘贴</div><div class="row-desc" id="axDesc" data-i18n="autoPasteDesc">选中记录后直接粘贴到当前应用（需辅助功能授权）</div></div>
                 <button class="switch" data-key="autoPaste"><span></span></button>
               </div>
               <div class="row">
-                <div class="row-main"><div class="row-label">仅粘贴纯文本</div><div class="row-desc">去除富文本样式与链接格式</div></div>
+                <div class="row-main"><div class="row-label" data-i18n="plainText">仅粘贴纯文本</div><div class="row-desc" data-i18n="plainTextDesc">去除富文本样式与链接格式</div></div>
                 <button class="switch" data-key="pastePlainText"><span></span></button>
               </div>
               <div class="row">
-                <div class="row-main"><div class="row-label">复制提示音</div><div class="row-desc">复制成功时播放轻提示音</div></div>
+                <div class="row-main"><div class="row-label" data-i18n="playSound">复制提示音</div><div class="row-desc" data-i18n="playSoundDesc">复制成功时播放轻提示音</div></div>
                 <button class="switch" data-key="playSound"><span></span></button>
               </div>
             </div>
           </div>
 
           <div class="group">
-            <div class="group-title">快捷键</div>
+            <div class="group-title" data-i18n="grpHotkey">快捷键</div>
             <div class="group-card">
               <div class="row">
-                <div class="row-main"><div class="row-label">全局唤出面板</div><div class="row-desc" id="hotkeyDesc">在任意应用中呼出剪贴板历史</div></div>
+                <div class="row-main"><div class="row-label" data-i18n="hotkeyGlobal">全局唤出面板</div><div class="row-desc" id="hotkeyDesc" data-i18n="hotkeyGlobalDesc">在任意应用中呼出剪贴板历史</div></div>
                 <button class="recorder" id="btnRecord"><span id="recValue">⌘⇧V</span></button>
               </div>
               <div class="row">
-                <div class="row-main"><div class="row-label">面板内快捷操作</div><div class="row-desc">↑↓ 选择 · ↵ 复制 · ⌘1–9 快速复制 · ⌘⌫ 删除</div></div>
+                <div class="row-main"><div class="row-label" data-i18n="inPanelKeys">面板内快捷操作</div><div class="row-desc" data-i18n="inPanelKeysDesc">↑↓ 选择 · ↵ 复制 · ⌘1–9 快速复制 · ⌘⌫ 删除</div></div>
               </div>
             </div>
           </div>
 
           <div class="group">
-            <div class="group-title">历史存储</div>
+            <div class="group-title" data-i18n="grpHistory">历史存储</div>
             <div class="group-card">
               <div class="row col">
-                <div class="row-main"><div class="row-label">保留条数</div></div>
+                <div class="row-main"><div class="row-label" data-i18n="keepItems">保留条数</div></div>
                 <div class="pills" data-key="maxItems" data-type="int">
                   <button data-v="100">100</button>
                   <button data-v="300">300</button>
@@ -152,7 +167,7 @@
                 </div>
               </div>
               <div class="row col">
-                <div class="row-main"><div class="row-label">图片存储上限</div></div>
+                <div class="row-main"><div class="row-label" data-i18n="imgLimit">图片存储上限</div></div>
                 <div class="pills" data-key="maxImageMB" data-type="int">
                   <button data-v="100">100MB</button>
                   <button data-v="200">200MB</button>
@@ -161,61 +176,61 @@
                 </div>
               </div>
               <div class="row col">
-                <div class="row-main"><div class="row-label">自动清理</div></div>
+                <div class="row-main"><div class="row-label" data-i18n="autoClean">自动清理</div></div>
                 <div class="pills" data-key="maxDays" data-type="int">
-                  <button data-v="0">永不</button>
-                  <button data-v="7">7 天</button>
-                  <button data-v="30">30 天</button>
-                  <button data-v="90">90 天</button>
+                  <button data-v="0" data-i18n="never">永不</button>
+                  <button data-v="7" data-i18n="d7">7 天</button>
+                  <button data-v="30" data-i18n="d30">30 天</button>
+                  <button data-v="90" data-i18n="d90">90 天</button>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="group">
-            <div class="group-title">存储</div>
+            <div class="group-title" data-i18n="grpStorage">存储</div>
             <div class="group-card">
               <div class="row">
                 <div class="row-main">
-                  <div class="row-label">存储位置</div>
+                  <div class="row-label" data-i18n="storageDir">存储位置</div>
                   <div class="row-desc" id="storageDirLabel">默认（~/Library/Application Support/Local Clipboard）</div>
                 </div>
                 <div class="btns">
-                  <button class="mini" id="btnChangeDir">更改…</button>
-                  <button class="mini" id="btnResetDir">恢复默认</button>
+                  <button class="mini" id="btnChangeDir" data-i18n="change">更改…</button>
+                  <button class="mini" id="btnResetDir" data-i18n="reset">恢复默认</button>
                 </div>
               </div>
               <div class="row">
                 <div class="row-main">
-                  <div class="row-label">备份与恢复</div>
-                  <div class="row-desc">导出全部历史为 zip，或在其他电脑导入合并</div>
+                  <div class="row-label" data-i18n="backup">备份与恢复</div>
+                  <div class="row-desc" data-i18n="backupDesc">导出全部历史为 zip，或在其他电脑导入合并</div>
                 </div>
                 <div class="btns">
-                  <button class="mini" id="btnExport">导出…</button>
-                  <button class="mini" id="btnImport">导入…</button>
+                  <button class="mini" id="btnExport" data-i18n="exportBtn">导出…</button>
+                  <button class="mini" id="btnImport" data-i18n="importBtn">导入…</button>
                 </div>
               </div>
               <div class="row">
                 <div class="row-main">
-                  <div class="row-label">已用空间</div>
+                  <div class="row-label" data-i18n="usage">已用空间</div>
                   <div class="row-desc" id="usageDesc">—</div>
                 </div>
                 <div class="btns">
-                  <button class="mini" id="btnReveal">打开目录</button>
-                  <button class="mini danger" id="btnClear">清空</button>
+                  <button class="mini" id="btnReveal" data-i18n="reveal">打开目录</button>
+                  <button class="mini danger" id="btnClear" data-i18n="clearBtn">清空</button>
                 </div>
               </div>
               <div class="row">
-                <div class="row-main"><div class="row-label">清空方式</div><div class="row-desc">清空时保留已置顶的记录</div></div>
+                <div class="row-main"><div class="row-label" data-i18n="clearMode">清空方式</div><div class="row-desc" data-i18n="clearModeDesc">清空时保留已置顶的记录</div></div>
                 <button class="switch" id="keepPinnedSw"><span></span></button>
               </div>
             </div>
           </div>
 
           <div class="about">
-            <div class="about-name">Local Clipboard <span id="verLabel">1.1.0</span></div>
-            <div class="about-desc">原生剪贴板历史 · 本地存储 · 不上传任何数据</div>
-            <button class="mini quit" id="btnQuit">退出 Local Clipboard</button>
+            <div class="about-name">Local Clipboard <span id="verLabel">1.2.0</span></div>
+            <div class="about-desc" data-i18n="aboutDesc">原生剪贴板历史 · 本地存储 · 不上传任何数据</div>
+            <button class="mini quit" id="btnQuit" data-i18n="quit">退出 Local Clipboard</button>
           </div>
         </div>
       </section>
@@ -225,7 +240,7 @@
         <img id="previewImg" alt="" />
         <div class="preview-bar">
           <span id="previewMeta"></span>
-          <button class="mini" id="btnPreviewClose">关闭</button>
+          <button class="mini" id="btnPreviewClose" data-i18n="previewClose">关闭</button>
         </div>
       </div>
 

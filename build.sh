@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 
 APP_NAME="Local Clipboard"      # 显示名（App 包名 / 窗口标题 / DMG 卷名）
 EXEC_NAME="LocalClipboard"      # 可执行文件名（不带空格，避免启动项/脚本转义问题）
-VERSION="1.1.0"
+VERSION="1.2.0"
 BUILD="build"
 APP="$BUILD/$APP_NAME.app"
 SDK="$(xcrun --show-sdk-path)"
@@ -25,6 +25,7 @@ swiftc -O -Osize -sdk "$SDK" -target "$TARGET" \
   Sources/ClipboardMonitor.swift \
   Sources/PasteService.swift \
   Sources/HotKeyManager.swift \
+  Sources/L10n.swift \
   Sources/DataTransfer.swift \
   Sources/PanelController.swift \
   Sources/AppDelegate.swift \

@@ -282,7 +282,7 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
             let keep = (body["keepPinned"] as? Bool) ?? false
             store.clear(keepPinned: keep)
             pushItems()
-            toast(keep ? "已清空历史，保留置顶项" : "已清空全部历史")
+            toast(L10n.cleared(keep))
 
         case "preview":
             if let id = body["id"] as? String, let item = store.item(id) {
@@ -295,7 +295,11 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
 
         case "applySettings":
             if let payload = body["values"] as? [String: Any] {
+                let oldLang = settings.language
                 settings.apply(payload)
+                if payload["language"] != nil {
+                    L10n.refresh(settings.language)
+                }
                 if payload["appearance"] != nil {
                     syncAppearance()
                 }
@@ -304,11 +308,15 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
                 pushItems()
                 pushSettings()
                 if payload["launchAtLogin"] != nil {
-                    toast(LaunchAtLogin.isEnabled ? "已开启开机自启动" : "已关闭开机自启动")
+                    toast(LaunchAtLogin.isEnabled ? L10n.launchLoginOn : L10n.launchLoginOff)
                 }
                 if payload["autoPaste"] as? Bool == true, !PasteService.isTrusted {
                     PasteService.requestTrust()
-                    toast("自动粘贴需要在「辅助功能」中授权")
+                    toast(L10n.needAccessibility)
+                }
+                if payload["language"] != nil, settings.language != oldLang {
+                    // 语言变化：广播已由 L10n.refresh 发出，这里补推一次设置让网页词表立即生效
+                    pushSettings()
                 }
             }
 
@@ -355,7 +363,7 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
     private func copyItem(_ id: String) {
         guard let item = store.item(id) else { return }
         guard PasteService.write(item, plainText: settings.pastePlainText) else {
-            toast("这条记录已失效")
+            toast(L10n.itemUnavailable)
             return
         }
         if settings.playSound { NSSound(named: "Tink")?.play() }
@@ -395,7 +403,7 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
             if event.modifierFlags.contains(.option) { mods |= optionKey }
             if event.modifierFlags.contains(.control) { mods |= controlKey }
             guard mods != 0 else {
-                self.call("toast", self.jsonString(["text": "请同时按下 ⌘ / ⌃ / ⌥ / ⇧ 中的一个"]))
+                self.call("toast", self.jsonString(["text": L10n.needModKey]))
                 return nil
             }
             let ok = HotKeyManager.shared.register(code: Int(event.keyCode), mods: mods)
@@ -451,8 +459,8 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
         panel.canCreateDirectories = true
         panel.allowsMultipleSelection = false
         panel.directoryURL = settings.storageRoot
-        panel.message = "选择剪贴板历史的存储位置（会自动迁移现有数据）"
-        panel.prompt = "选择"
+        panel.message = L10n.chooseStorageMessage
+        panel.prompt = L10n.choosePrompt
         let resp = panel.runModal()
         guard resp == .OK, let url = panel.url else { return }
         if url.standardizedFileURL.path == HistoryStore.defaultRoot().standardizedFileURL.path {
@@ -467,14 +475,14 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
         settings.storageDir = target.path
         pushSettings()
         pushItems()
-        toast("已迁移到新位置")
+        toast(L10n.migrated)
     }
 
     /// 恢复默认存储位置（如有自定义则迁移回默认目录）
     private func resetStorageDir(silent: Bool = false) {
         let def = HistoryStore.defaultRoot()
         if settings.storageDir.isEmpty {
-            if !silent { toast("当前已在使用默认位置") }
+            if !silent { toast(L10n.alreadyDefault) }
             return
         }
         if let err = store.migrateData(to: def) {
@@ -484,7 +492,7 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
         settings.storageDir = ""
         pushSettings()
         pushItems()
-        toast("已恢复默认存储位置")
+        toast(L10n.restoredDefault)
     }
 
     private func exportBackup() {
@@ -492,13 +500,13 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.zip]
         panel.nameFieldStringValue = "Local Clipboard Backup \(HistoryStore.transferStamp()).zip"
-        panel.title = "导出剪贴板备份"
+        panel.title = L10n.exportTitle
         let resp = panel.runModal()
         guard resp == .OK, let url = panel.url else { return }
         if let err = store.exportData(to: url) {
             toast(err)
         } else {
-            toast("备份已导出")
+            toast(L10n.exported)
             NSWorkspace.shared.activateFileViewerSelecting([url])
         }
     }
@@ -510,8 +518,8 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
         panel.canChooseFiles = true
         panel.allowsMultipleSelection = false
         panel.allowedContentTypes = [.zip]
-        panel.message = "选择之前导出的备份 zip（与当前历史合并，重复内容自动跳过）"
-        panel.prompt = "导入"
+        panel.message = L10n.importMessage
+        panel.prompt = L10n.importPrompt
         let resp = panel.runModal()
         guard resp == .OK, let url = panel.url else { return }
         let (n, msg) = store.importData(from: url)
@@ -520,7 +528,7 @@ final class PanelController: NSObject, WKScriptMessageHandler, NSWindowDelegate 
         if let msg {
             toast(msg)
         } else {
-            toast("已导入 \(n) 条记录")
+            toast(L10n.imported(n))
         }
     }
 }

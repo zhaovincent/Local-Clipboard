@@ -14,12 +14,254 @@
  * limitations under the License.
  */
 
-/* Local Clipboard — 界面逻辑 */
+/* Local Clipboard — 界面逻辑 / UI logic */
 (function () {
   "use strict";
 
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
+
+  /* ---------------- 国际化 / i18n ---------------- */
+  const I18N = {
+    zh: {
+      brandSub: "剪贴板历史",
+      tabAll: "全部",
+      tabText: "文本",
+      tabImage: "图片",
+      tabFile: "文件",
+      tabPin: "置顶",
+      sectionPinned: "置顶",
+      sectionRecent: "最近",
+      hintSelect: " 选择",
+      hintCopy: " 复制",
+      hintDelete: " 删除",
+      autoPaste: "自动粘贴",
+      copyOnly: "仅复制",
+      emptyTitle: "还没有剪贴板记录",
+      emptyDesc: "复制任意文字、图片或文件，这里会自动收集",
+      emptyKeySuffix: "随时唤出面板",
+      emptyNoMatch: "没有找到匹配的记录",
+      emptyNoMatchDesc: "试试其他关键词，或按 esc 清空搜索",
+      emptyFilter: "这个分类还没有内容",
+      emptyFilterDesc: "复制对应类型的内容后会自动出现在这里",
+      settingsTitle: "设置",
+      searchPh: "搜索剪贴板历史…",
+      grpGeneral: "通用",
+      language: "语言 / Language",
+      languageDesc: "界面显示语言，跟随系统可自动选择",
+      followSystem: "跟随系统",
+      chinese: "中文",
+      english: "English",
+      appearance: "外观",
+      appearanceDesc: "深浅色模式，可跟随系统自动切换",
+      light: "浅色",
+      dark: "深色",
+      launchLogin: "开机自动启动",
+      launchLoginDesc: "登录后自动在后台运行",
+      autoPasteRow: "复制后自动粘贴",
+      autoPasteDesc: "选中记录后直接粘贴到当前应用（需辅助功能授权）",
+      plainText: "仅粘贴纯文本",
+      plainTextDesc: "去除富文本样式与链接格式",
+      playSound: "复制提示音",
+      playSoundDesc: "复制成功时播放轻提示音",
+      grpHotkey: "快捷键",
+      hotkeyGlobal: "全局唤出面板",
+      hotkeyGlobalDesc: "在任意应用中呼出剪贴板历史",
+      hotkeyBusyDesc: "当前快捷键被占用或注册失败，请点击右侧重新设置",
+      inPanelKeys: "面板内快捷操作",
+      inPanelKeysDesc: "↑↓ 选择 · ↵ 复制 · ⌘1–9 快速复制 · ⌘⌫ 删除",
+      grpHistory: "历史存储",
+      keepItems: "保留条数",
+      imgLimit: "图片存储上限",
+      autoClean: "自动清理",
+      never: "永不",
+      d7: "7 天",
+      d30: "30 天",
+      d90: "90 天",
+      grpStorage: "存储",
+      storageDir: "存储位置",
+      storageDefault: "默认（~/Library/Application Support/Local Clipboard）",
+      change: "更改…",
+      reset: "恢复默认",
+      backup: "备份与恢复",
+      backupDesc: "导出全部历史为 zip，或在其他电脑导入合并",
+      exportBtn: "导出…",
+      importBtn: "导入…",
+      usage: "已用空间",
+      reveal: "打开目录",
+      clearBtn: "清空",
+      clearMode: "清空方式",
+      clearModeDesc: "清空时保留已置顶的记录",
+      aboutDesc: "原生剪贴板历史 · 本地存储 · 不上传任何数据",
+      quit: "退出 Local Clipboard",
+      previewClose: "关闭",
+      tipSettings: "设置 ⌘,",
+      tipClose: "关闭 esc",
+      tipAutopaste: "复制后自动粘贴到当前应用",
+      tipBack: "返回",
+      tipClearHead: "清空历史（保留置顶）",
+      tipClearAll: "清空全部历史",
+      tipPin: "置顶",
+      tipUnpin: "取消置顶",
+      tipCopy: "复制并粘贴 ↵",
+      tipDelete: "删除 ⌘⌫",
+      usageLine: "{0} · {1} · {2}",
+      itemCount: "{0} 条记录",
+      imageCount: "{0} 张图片",
+      subtitleBase: "剪贴板历史 · {0} 条",
+      subtitlePinned: " · {0} 置顶",
+      timeJustNow: "刚刚",
+      timeMinutes: "{0} 分钟前",
+      timeHours: "{0} 小时前",
+      timeYesterday: "昨天 {0}",
+      timeDate: "{0}月{1}日 {2}",
+      metaFiles: "{0} 个文件",
+      metaLink: "链接",
+      metaChars: "{0} 字",
+      imageLabel: "图片 {0} × {1}",
+      kindText: "文本",
+      kindLink: "链接",
+      kindImage: "图片",
+      kindFile: "文件",
+      recWaiting: "按下按键…",
+      toastHotkeyUpdated: "快捷键已更新为 {0}",
+      toastHotkeyConflict: "该快捷键已被其他应用占用",
+      toastClearConfirmAll: "再次点击清空全部历史",
+      toastClearConfirmKeep: "再次点击清空历史（保留置顶）",
+      axWarn: "未获得「辅助功能」授权，复制后不会自动粘贴（点击此处前往授权）"
+    },
+    en: {
+      brandSub: "Clipboard History",
+      tabAll: "All",
+      tabText: "Text",
+      tabImage: "Images",
+      tabFile: "Files",
+      tabPin: "Pinned",
+      sectionPinned: "Pinned",
+      sectionRecent: "Recent",
+      hintSelect: " Select",
+      hintCopy: " Copy",
+      hintDelete: " Delete",
+      autoPaste: "Auto-paste",
+      copyOnly: "Copy only",
+      emptyTitle: "No clipboard history yet",
+      emptyDesc: "Copy any text, image or file and it will be collected here",
+      emptyKeySuffix: "opens the panel anytime",
+      emptyNoMatch: "No matching items",
+      emptyNoMatchDesc: "Try another keyword, or press esc to clear the search",
+      emptyFilter: "Nothing in this category yet",
+      emptyFilterDesc: "Copy something of this type and it will show up here",
+      settingsTitle: "Settings",
+      searchPh: "Search clipboard history…",
+      grpGeneral: "General",
+      language: "Language",
+      languageDesc: "Interface language. Auto follows your Mac.",
+      followSystem: "Auto",
+      chinese: "中文",
+      english: "English",
+      appearance: "Appearance",
+      appearanceDesc: "Light or dark theme, or follow the system",
+      light: "Light",
+      dark: "Dark",
+      launchLogin: "Launch at login",
+      launchLoginDesc: "Run in the background after you log in",
+      autoPasteRow: "Paste after copying",
+      autoPasteDesc: "Paste into the current app right after you pick an item (needs Accessibility)",
+      plainText: "Paste as plain text",
+      plainTextDesc: "Strip rich text styling and link formatting",
+      playSound: "Sound on copy",
+      playSoundDesc: "Play a soft sound when an item is copied",
+      grpHotkey: "Shortcut",
+      hotkeyGlobal: "Global shortcut",
+      hotkeyGlobalDesc: "Open clipboard history from any app",
+      hotkeyBusyDesc: "This shortcut is taken or failed to register — set a new one on the right",
+      inPanelKeys: "In-panel shortcuts",
+      inPanelKeysDesc: "↑↓ select · ↵ copy · ⌘1–9 quick copy · ⌘⌫ delete",
+      grpHistory: "History",
+      keepItems: "Items to keep",
+      imgLimit: "Image storage limit",
+      autoClean: "Auto cleanup",
+      never: "Never",
+      d7: "7 days",
+      d30: "30 days",
+      d90: "90 days",
+      grpStorage: "Storage",
+      storageDir: "Storage location",
+      storageDefault: "Default (~/Library/Application Support/Local Clipboard)",
+      change: "Change…",
+      reset: "Reset to default",
+      backup: "Backup & restore",
+      backupDesc: "Export all history as a zip, or import and merge it on another Mac",
+      exportBtn: "Export…",
+      importBtn: "Import…",
+      usage: "Space used",
+      reveal: "Show folder",
+      clearBtn: "Clear",
+      clearMode: "Clear behavior",
+      clearModeDesc: "Keep pinned items when clearing",
+      aboutDesc: "Native clipboard history · Stored locally · Nothing leaves your Mac",
+      quit: "Quit Local Clipboard",
+      previewClose: "Close",
+      tipSettings: "Settings ⌘,",
+      tipClose: "Close esc",
+      tipAutopaste: "Paste into the current app after copying",
+      tipBack: "Back",
+      tipClearHead: "Clear history (keep pinned)",
+      tipClearAll: "Clear all history",
+      tipPin: "Pin",
+      tipUnpin: "Unpin",
+      tipCopy: "Copy and paste ↵",
+      tipDelete: "Delete ⌘⌫",
+      usageLine: "{0} · {1} · {2}",
+      itemCount: "{0} items",
+      itemCountOne: "{0} item",
+      imageCount: "{0} images",
+      imageCountOne: "{0} image",
+      subtitleBase: "Clipboard History · {0} items",
+      subtitleBaseOne: "Clipboard History · {0} item",
+      subtitlePinned: " · {0} pinned",
+      timeJustNow: "Just now",
+      timeMinutes: "{0} min ago",
+      timeHours: "{0} h ago",
+      timeYesterday: "Yesterday {0}",
+      timeDate: "{0}/{1} {2}",
+      metaFiles: "{0} files",
+      metaLink: "Link",
+      metaChars: "{0} chars",
+      imageLabel: "Image {0} × {1}",
+      kindText: "Text",
+      kindLink: "Link",
+      kindImage: "Image",
+      kindFile: "File",
+      recWaiting: "Press keys…",
+      toastHotkeyUpdated: "Shortcut updated to {0}",
+      toastHotkeyConflict: "That shortcut is already taken by another app",
+      toastClearConfirmAll: "Click again to clear all history",
+      toastClearConfirmKeep: "Click again to clear history (pinned kept)",
+      axWarn: "Accessibility permission is not granted, so items will be copied but not pasted (click to grant)"
+    }
+  };
+
+  let LANG = "zh";
+
+  function t(key) {
+    const args = Array.prototype.slice.call(arguments, 1);
+    const table = I18N[LANG] || I18N.zh;
+    let s = table[key];
+    if (s == null) s = I18N.zh[key];
+    if (s == null) return key;
+    if (args.length) {
+      s = s.replace(/\{(\d+)\}/g, (m, i) => (args[Number(i)] != null ? String(args[Number(i)]) : m));
+    }
+    return s;
+  }
+
+  /* ---------------- 原生通信 ---------------- */
+  function post(cmd, extra) {
+    try {
+      window.webkit.messageHandlers.clip.postMessage(Object.assign({ cmd: cmd }, extra || {}));
+    } catch (e) { /* 非 WebView 环境 */ }
+  }
 
   const state = {
     items: [],
@@ -32,13 +274,6 @@
     recording: false,
     keepPinned: true
   };
-
-  /* ---------------- 原生通信 ---------------- */
-  function post(cmd, extra) {
-    try {
-      window.webkit.messageHandlers.clip.postMessage(Object.assign({ cmd: cmd }, extra || {}));
-    } catch (e) { /* 非 WebView 环境 */ }
-  }
 
   window.__native = {
     items(data) {
@@ -53,6 +288,8 @@
     },
     settings(s) {
       state.settings = s || {};
+      // 语言：原生侧解析 auto 后下发生效语言，切语言时整页重刷文案
+      if (s && s.lang && s.lang !== LANG) setLang(s.lang);
       // 首次拿到设置时先按 dark 标志上底色，避免等原生 theme() 期间闪白
       if (document.documentElement.dataset.theme === undefined && s && typeof s.dark === "boolean") {
         document.documentElement.dataset.theme = s.dark ? "dark" : "light";
@@ -64,6 +301,7 @@
       document.body.classList.add("open");
       closeSettings();
       hidePreview();
+      disarmedClear();
       state.query = "";
       $("#q").value = "";
       state.sel = 0;
@@ -76,20 +314,21 @@
       document.body.classList.remove("open");
       closeSettings();
       hidePreview();
+      disarmedClear();
     },
-    toast(t) {
-      showToast(t && t.text ? t.text : String(t || ""));
+    toast(t0) {
+      showToast(t0 && t0.text ? t0.text : String(t0 || ""));
     },
-    theme(t) {
-      if (t && t.mode) state.settings.appearance = t.mode;
+    theme(th) {
+      if (th && th.mode) state.settings.appearance = th.mode;
       // dark 由原生侧解析（auto 时跟随系统），网页只认最终结果
-      document.documentElement.dataset.theme = t && t.dark ? "dark" : "light";
+      document.documentElement.dataset.theme = th && th.dark ? "dark" : "light";
       renderSettings();
     },
     preview(p) {
       if (!p) return;
       const item = state.items.find((i) => i.id === p.id);
-      showPreview(p.src, item ? `${item.w} × ${item.h}` : "");
+      showPreview(p.src, item ? t("imageLabel", item.w || 0, item.h || 0) : "");
     },
     hotkeyRecording(r) {
       state.recording = false;
@@ -97,9 +336,9 @@
       btn.classList.remove("recording");
       if (r && r.ok) {
         $("#recValue").textContent = r.display;
-        showToast("快捷键已更新为 " + r.display);
+        showToast(t("toastHotkeyUpdated", r.display));
       } else if (r && r.conflict) {
-        showToast("该快捷键已被其他应用占用");
+        showToast(t("toastHotkeyConflict"));
       }
       renderSettings();
     },
@@ -122,7 +361,6 @@
   };
 
   const KIND_ICON = { text: SVG.text, link: SVG.link, image: SVG.image, file: SVG.file };
-  const KIND_NAME = { text: "文本", link: "链接", image: "图片", file: "文件" };
 
   function esc(s) {
     return String(s == null ? "" : s)
@@ -132,16 +370,23 @@
       .replace(/"/g, "&quot;");
   }
 
+  /// 计数文案：英文单数取 xxxOne 变体，中文始终用基数
+  function countOf(n, baseKey) {
+    const oneKey = baseKey + "One";
+    const key = LANG === "en" && n === 1 && I18N.en[oneKey] ? oneKey : baseKey;
+    return t(key, n);
+  }
+
   function timeAgo(ts) {
     const diff = Date.now() / 1000 - ts;
-    if (diff < 45) return "刚刚";
-    if (diff < 3600) return Math.floor(diff / 60) + " 分钟前";
-    if (diff < 86400) return Math.floor(diff / 3600) + " 小时前";
+    if (diff < 45) return t("timeJustNow");
+    if (diff < 3600) return t("timeMinutes", Math.floor(diff / 60));
+    if (diff < 86400) return t("timeHours", Math.floor(diff / 3600));
     const d = new Date(ts * 1000);
     const hh = String(d.getHours()).padStart(2, "0");
     const mm = String(d.getMinutes()).padStart(2, "0");
-    if (diff < 172800) return "昨天 " + hh + ":" + mm;
-    return (d.getMonth() + 1) + "月" + d.getDate() + "日 " + hh + ":" + mm;
+    if (diff < 172800) return t("timeYesterday", hh + ":" + mm);
+    return t("timeDate", d.getMonth() + 1, d.getDate(), hh + ":" + mm);
   }
 
   function sizeText(n) {
@@ -163,9 +408,9 @@
     });
     if (q) {
       list = list.filter((it) => {
-        const t = (it.text || "").toLowerCase();
-        const s = (it.source || "").toLowerCase();
-        return t.indexOf(q) >= 0 || s.indexOf(q) >= 0;
+        const tx = (it.text || "").toLowerCase();
+        const sr = (it.source || "").toLowerCase();
+        return tx.indexOf(q) >= 0 || sr.indexOf(q) >= 0;
       });
     }
     return list;
@@ -180,11 +425,11 @@
       parts.push("<span>" + sizeText(it.size) + "</span>");
     } else if (it.kind === "file") {
       const n = (it.text || "").split("\n").filter(Boolean).length;
-      parts.push("<span>" + n + " 个文件</span>");
+      parts.push("<span>" + t("metaFiles", n) + "</span>");
     } else if (it.kind === "link") {
-      parts.push("<span>链接</span>");
+      parts.push("<span>" + t("metaLink") + "</span>");
     } else {
-      parts.push("<span>" + (it.len || 0) + " 字</span>");
+      parts.push("<span>" + t("metaChars", it.len || 0) + "</span>");
     }
     let html = "";
     parts.forEach((p, i) => {
@@ -200,9 +445,9 @@
       ? '<img class="thumb" data-act="preview" data-id="' + it.id + '" src="' + it.thumb + '" alt="" />'
       : '<div class="tile">' + (KIND_ICON[it.kind] || SVG.text) + "</div>";
     let text = it.text || "";
-    if (it.kind === "image") text = "图片 " + (it.w || 0) + " × " + (it.h || 0);
+    if (it.kind === "image") text = t("imageLabel", it.w || 0, it.h || 0);
     if (it.kind === "file") {
-      text = text.split("\n").filter(Boolean).map((p) => p.split("/").pop()).join("、");
+      text = text.split("\n").filter(Boolean).map((p) => p.split("/").pop()).join(LANG === "en" ? ", " : "、");
     }
     const mono = it.kind === "link" ? " mono" : "";
     return (
@@ -213,9 +458,9 @@
       '<div class="meta">' + metaHTML(it) + "</div>" +
       "</div>" +
       '<div class="acts">' +
-      '<button data-act="pin" data-id="' + it.id + '" class="' + (it.pinned ? "on" : "") + '" data-tip="' + (it.pinned ? "取消置顶" : "置顶") + '">' + (it.pinned ? SVG.pinFill : SVG.pin) + "</button>" +
-      '<button data-act="copy" data-id="' + it.id + '" data-tip="复制并粘贴 ↵">' + SVG.copy + "</button>" +
-      '<button data-act="del" data-id="' + it.id + '" data-tip="删除 ⌘⌫">' + SVG.trash + "</button>" +
+      '<button data-act="pin" data-id="' + it.id + '" class="' + (it.pinned ? "on" : "") + '" data-tip="' + esc(it.pinned ? t("tipUnpin") : t("tipPin")) + '">' + (it.pinned ? SVG.pinFill : SVG.pin) + "</button>" +
+      '<button data-act="copy" data-id="' + it.id + '" data-tip="' + esc(t("tipCopy")) + '">' + SVG.copy + "</button>" +
+      '<button data-act="del" data-id="' + it.id + '" data-tip="' + esc(t("tipDelete")) + '">' + SVG.trash + "</button>" +
       "</div>" +
       '<div class="flash"></div>' +
       "</div>"
@@ -234,14 +479,14 @@
       const empty = $("#empty");
       empty.classList.add("show");
       if (state.query) {
-        $("#emptyTitle").textContent = "没有找到匹配的记录";
-        $("#emptyDesc").textContent = "试试其他关键词，或按 esc 清空搜索";
+        $("#emptyTitle").textContent = t("emptyNoMatch");
+        $("#emptyDesc").textContent = t("emptyNoMatchDesc");
       } else if (state.filter !== "all") {
-        $("#emptyTitle").textContent = "这个分类还没有内容";
-        $("#emptyDesc").textContent = "复制对应类型的内容后会自动出现在这里";
+        $("#emptyTitle").textContent = t("emptyFilter");
+        $("#emptyDesc").textContent = t("emptyFilterDesc");
       } else {
-        $("#emptyTitle").textContent = "还没有剪贴板记录";
-        $("#emptyDesc").textContent = "复制任意文字、图片或文件，这里会自动收集";
+        $("#emptyTitle").textContent = t("emptyTitle");
+        $("#emptyDesc").textContent = t("emptyDesc");
       }
       return;
     }
@@ -253,11 +498,11 @@
     list.forEach((it, i) => {
       if (state.filter !== "pin") {
         if (it.pinned && !pinnedHead) {
-          html += '<div class="sechead">' + SVG.pinHead + "置顶</div>";
+          html += '<div class="sechead">' + SVG.pinHead + esc(t("sectionPinned")) + "</div>";
           pinnedHead = true;
         }
         if (!it.pinned && !normalHead) {
-          html += '<div class="sechead">最近</div>';
+          html += '<div class="sechead">' + esc(t("sectionRecent")) + "</div>";
           normalHead = true;
         }
       }
@@ -277,9 +522,29 @@
 
   function updateSubtitle() {
     const s = state.stats || { count: 0 };
-    let text = "剪贴板历史 · " + s.count + " 条";
-    if (s.pinned) text += " · " + s.pinned + " 置顶";
+    let text = countOf(s.count || 0, "subtitleBase");
+    if (s.pinned) text += t("subtitlePinned", s.pinned);
     $("#subtitle").textContent = text;
+  }
+
+  /* ---------------- 视图层文案切换 ---------------- */
+  function applyI18n() {
+    $$("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+    $$("[data-i18n-tip]").forEach((el) => { el.dataset.tip = t(el.dataset.i18nTip); });
+    $$("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+    syncClearTips();
+    updateSubtitle();
+    const ap = $("#apText");
+    if (ap) ap.textContent = state.settings.autoPaste ? t("autoPaste") : t("copyOnly");
+    if (state.recording) $("#recValue").textContent = t("recWaiting");
+  }
+
+  function setLang(lang) {
+    LANG = lang === "en" ? "en" : "zh";
+    document.documentElement.lang = LANG === "en" ? "en" : "zh-Hans";
+    applyI18n();
+    render();
+    renderSettings();
   }
 
   /* ---------------- 操作 ---------------- */
@@ -307,7 +572,7 @@
     });
 
     const rec = $("#recValue");
-    if (rec && s.hotkey) rec.textContent = s.hotkey;
+    if (rec && s.hotkey && !state.recording) rec.textContent = s.hotkey;
     const ek = $("#emptyKey");
     if (ek && s.hotkey) ek.textContent = s.hotkey;
 
@@ -318,7 +583,7 @@
 
     const st = state.stats;
     $("#usageDesc").textContent = st
-      ? st.bytesText + " · " + st.count + " 条记录 · " + st.images + " 张图片"
+      ? t("usageLine", st.bytesText, countOf(st.count, "itemCount"), countOf(st.images, "imageCount"))
       : "—";
     $("#verLabel").textContent = s.version || "";
 
@@ -329,7 +594,7 @@
         sd.textContent = dir;
         sd.title = dir;
       } else {
-        sd.textContent = "默认（~/Library/Application Support/Local Clipboard）";
+        sd.textContent = t("storageDefault");
         sd.title = dir;
       }
     }
@@ -341,32 +606,38 @@
     }
 
     $("#btnAutoPaste").classList.toggle("on", !!s.autoPaste);
-    $("#apText").textContent = s.autoPaste ? "自动粘贴" : "仅复制";
+    $("#apText").textContent = s.autoPaste ? t("autoPaste") : t("copyOnly");
     $("#keepPinnedSw").classList.toggle("on", state.keepPinned);
+    syncClearTips();
 
     const hd = $("#hotkeyDesc");
     if (hd) {
       if (s.hotkeyOk === false) {
-        hd.textContent = "当前快捷键被占用或注册失败，请点击右侧重新设置";
+        hd.textContent = t("hotkeyBusyDesc");
         hd.style.color = "#ffb26b";
       } else {
-        hd.textContent = "在任意应用中呼出剪贴板历史";
+        hd.textContent = t("hotkeyGlobalDesc");
         hd.style.color = "";
       }
     }
 
     const ax = $("#axDesc");
     if (ax && s.trusted === false) {
-      ax.textContent = "未获得「辅助功能」授权，复制后不会自动粘贴（点击此处前往授权）";
+      ax.textContent = t("axWarn");
       ax.style.color = "#ffb26b";
       ax.style.cursor = "pointer";
       ax.onclick = () => post("openAX");
+    } else if (ax) {
+      ax.textContent = t("autoPasteDesc");
+      ax.style.color = "";
+      ax.style.cursor = "";
+      ax.onclick = null;
     }
   }
 
   function resetFilter() {
     state.filter = "all";
-    $$(".tab").forEach((t) => t.classList.toggle("on", t.dataset.f === "all"));
+    $$(".tab").forEach((tb) => tb.classList.toggle("on", tb.dataset.f === "all"));
     moveIndicator();
   }
 
@@ -380,11 +651,11 @@
 
   function showToast(text) {
     if (!text) return;
-    const t = $("#toast");
+    const tip = $("#toast");
     $("#toastText").textContent = text;
-    t.classList.add("show");
+    tip.classList.add("show");
     clearTimeout(showToast._timer);
-    showToast._timer = setTimeout(() => t.classList.remove("show"), 1900);
+    showToast._timer = setTimeout(() => tip.classList.remove("show"), 1900);
   }
 
   function showPreview(src, meta) {
@@ -396,6 +667,41 @@
   function hidePreview() {
     $("#preview").classList.remove("open");
     $("#previewImg").removeAttribute("src");
+  }
+
+  /* ---------------- 一键清除（二次确认） ---------------- */
+  const clearArm = { who: null, at: 0, timer: 0 };
+
+  function syncClearTips() {
+    const head = $("#btnClearHead");
+    if (head && clearArm.who !== "head") {
+      head.dataset.tip = state.keepPinned ? t("tipClearHead") : t("tipClearAll");
+    }
+  }
+
+  function disarmedClear() {
+    clearArm.who = null;
+    clearArm.at = 0;
+    clearTimeout(clearArm.timer);
+    $$(".arming").forEach((el) => el.classList.remove("arming"));
+    syncClearTips();
+  }
+
+  /// 第一次点击进入待确认态（3.5s 内），第二次点击才真正清空
+  function requestClear(who, btn) {
+    const keep = state.keepPinned;
+    const now = Date.now();
+    if (clearArm.who === who && now - clearArm.at < 3500) {
+      disarmedClear();
+      post("clearAll", { keepPinned: keep });
+      return;
+    }
+    clearArm.who = who;
+    clearArm.at = now;
+    if (btn) btn.classList.add("arming");
+    clearTimeout(clearArm.timer);
+    clearArm.timer = setTimeout(() => disarmedClear(), 3500);
+    showToast(keep ? t("toastClearConfirmKeep") : t("toastClearConfirmAll"));
   }
 
   /* ---------------- 标签指示器 ---------------- */
@@ -414,6 +720,9 @@
     $("#btnClose").addEventListener("click", () => post("hide"));
     $("#btnBack").addEventListener("click", closeSettings);
 
+    const clearHead = $("#btnClearHead");
+    if (clearHead) clearHead.addEventListener("click", () => requestClear("head", clearHead));
+
     // 搜索
     const q = $("#q");
     q.addEventListener("input", () => {
@@ -427,7 +736,7 @@
     // 标签
     $$(".tab").forEach((tab) => {
       tab.addEventListener("click", () => {
-        $$(".tab").forEach((t) => t.classList.remove("on"));
+        $$(".tab").forEach((tb) => tb.classList.remove("on"));
         tab.classList.add("on");
         state.filter = tab.dataset.f;
         state.sel = 0;
@@ -500,11 +809,11 @@
     $("#keepPinnedSw").addEventListener("click", () => {
       state.keepPinned = !state.keepPinned;
       renderSettings();
+      applyI18n();
     });
 
-    $("#btnClear").addEventListener("click", () => {
-      post("clearAll", { keepPinned: state.keepPinned });
-    });
+    const btnClear = $("#btnClear");
+    if (btnClear) btnClear.addEventListener("click", () => requestClear("settings", btnClear));
     $("#btnReveal").addEventListener("click", () => post("revealData"));
     $("#btnQuit").addEventListener("click", () => post("quit"));
     $("#btnChangeDir").addEventListener("click", () => post("chooseStorageDir"));
@@ -523,7 +832,7 @@
       }
       state.recording = true;
       $("#btnRecord").classList.add("recording");
-      $("#recValue").textContent = "按下按键…";
+      $("#recValue").textContent = t("recWaiting");
       post("recordHotkey");
     });
 
@@ -542,6 +851,7 @@
 
       if (key === "Escape") {
         e.preventDefault();
+        if (clearArm.who) { disarmedClear(); return; }
         if ($("#preview").classList.contains("open")) { hidePreview(); return; }
         if ($("#settings").classList.contains("open")) { closeSettings(); return; }
         if (state.query) {
@@ -629,6 +939,9 @@
     window.addEventListener("resize", moveIndicator);
     document.addEventListener("contextmenu", (e) => e.preventDefault());
   }
+
+  // 首屏语言：先按系统语言猜测，原生推来 lang 后再校正
+  setLang(/^zh/i.test(navigator.language || "") ? "zh" : "en");
 
   bind();
   requestAnimationFrame(moveIndicator);
